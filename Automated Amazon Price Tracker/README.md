@@ -67,6 +67,48 @@ If the price is below your threshold, you will receive an email immediately. If 
 
 To run this script automatically (e.g., a few times a day for a month) without keeping your computer on, you can deploy it to a cloud server.
 
+### Option 1: GitHub Actions (Recommended for Free Scheduling)
+
+GitHub Actions allows you to run this script on a schedule for free.
+
+1. Push your code to a GitHub repository.
+2. Add your `MY_EMAIL` and `MY_PASSWORD` to the repository's **Settings > Secrets and variables > Actions**.
+3. Create a file at `.github/workflows/scrape.yml` with the following content to run it every 6 hours:
+
+```yaml
+name: Check Price
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:       # Allows manual run
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 python-dotenv
+      - name: Run script
+        env:
+          MY_EMAIL: ${{ secrets.MY_EMAIL }}
+          MY_PASSWORD: ${{ secrets.MY_PASSWORD }}
+        run: python main.py
+```
+### Option 2: PythonAnywhere
+
+[PythonAnywhere](https://www.pythonanywhere.com) is a beginner-friendly platform that lets you upload your script and run it.
+
+1. Create a free account on PythonAnywhere.
+2. Upload your `main.py`, `amazon_scrape.py`, and `email_notificaiton.py` files to the "Files" tab.
+3. Go to the **Tasks** tab.
+4. Set the time (UTC) you want it to run.
+5. Enter the command: `python3.10 /home/yourusername/main.py` *(Note: The free tier usually allows 1 daily scheduled task. For more frequent checks, a small paid plan or GitHub Actions is better.)*
 
 ## 📂 Project Structure
 - `main.py`: The entry point. It orchestrates the scraping and notification logic.
